@@ -15,16 +15,16 @@ the `dispatcher` is then loaded through the dependency on your stores
 angular.module('my_app').service('my_store', [
     'dispatcher',
     (dispatcher) ->
+        listeners = []
         store =
             my_value: null
-            listeners: []
             addListener: (callback) ->
-                store.listeners.push(callback)
+                listeners.push(callback)
 
             removeListener: (callback) ->
-                index = store.listener.indexOf(callback)
+                index = listeners.indexOf(callback)
                 if index > -1
-                    store.listener.splice(index,1)
+                    listeners.splice(index,1)
 
         onDispatch = (action, payload) ->
             switch action
@@ -36,8 +36,8 @@ angular.module('my_app').service('my_store', [
                 else
                     return
 
-            # announce the change to whoever is listening
-            for callback in store.listeners
+            # announce the change to whatever is listening
+            for callback in listeners
                 callback()
 
 
