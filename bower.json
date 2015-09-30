@@ -1,0 +1,24 @@
+{
+  "name": "angularjs-dispatcher",
+  "version": "0.0.0",
+  "homepage": "https://github.com/debrice/angularjs-dispatcher",
+  "authors": [
+    "Brice Leroy <bbrriiccee@gmail.com>"
+  ],
+  "description": "An AngularJS implementation of the flux dispatcher",
+  "main": "dist/dispatcher.js",
+  "keywords": [
+    "flux",
+    "dispatcher",
+    "angular",
+    "angularjs"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
