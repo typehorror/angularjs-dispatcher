@@ -6,7 +6,7 @@ var uglify = require("gulp-uglify");
 var rename = require("gulp-rename");
 
 gulp.task("compile-coffee", function() {
-  gulp.src(["src/*.coffee"])            // Read the files
+  gulp.src(["src/dispatcher.coffee", "src/**/*.coffee"])
     .pipe(
       coffee({bare:true})               // Compile coffeescript
         .on("error", gutil.log)
