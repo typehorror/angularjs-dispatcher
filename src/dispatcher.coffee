@@ -40,11 +40,11 @@ angular.module('dispatcher', []).service 'dispatcher',
             >>> dispatcher.waitFor('X')  # no need to import X-provider here
         ###
         register: (callback, name) ->
-            if name of @registry
-                throw new Error("dispatcher.register(...): a store is already registered under #{name}.")
-
             unless name  # Generate an ID
                 name = "#{_prefix}#{@lastID++}"
+
+            if name of @registry
+                throw new Error("dispatcher.register(...): a store is already registered under #{name}.")
 
             @registry[name] = callback
 

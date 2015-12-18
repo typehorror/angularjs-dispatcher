@@ -38,11 +38,11 @@ angular.module('dispatcher', []).service('dispatcher', function(dataContract) {
         >>> dispatcher.waitFor('X')  # no need to import X-provider here
      */
     register: function(callback, name) {
-      if (name in this.registry) {
-        throw new Error("dispatcher.register(...): a store is already registered under " + name + ".");
-      }
       if (!name) {
         name = "" + _prefix + (this.lastID++);
+      }
+      if (name in this.registry) {
+        throw new Error("dispatcher.register(...): a store is already registered under " + name + ".");
       }
       this.registry[name] = callback;
       return name;
