@@ -41,7 +41,7 @@ angular.module('dispatcher', []).service 'dispatcher',
         ###
         register: (callback, name) ->
             unless name  # Generate an ID
-                name = "#{_prefix}#{@lastID++}"
+                name = "#{@prefix}#{@lastID++}"
 
             if name of @registry
                 throw new Error("dispatcher.register(...): a store is already registered under #{name}.")

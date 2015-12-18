@@ -39,7 +39,7 @@ angular.module('dispatcher', []).service('dispatcher', function(dataContract) {
      */
     register: function(callback, name) {
       if (!name) {
-        name = "" + _prefix + (this.lastID++);
+        name = "" + this.prefix + (this.lastID++);
       }
       if (name in this.registry) {
         throw new Error("dispatcher.register(...): a store is already registered under " + name + ".");
