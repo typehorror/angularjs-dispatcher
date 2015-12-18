@@ -1,12 +1,14 @@
 angular.module('dispatcher', []).service('dispatcher', function(dataContract) {
-  var invoke;
-  this.registry = {};
-  this.isHandled = {};
-  this.isPending = {};
-  this.lastID = 1;
-  this.isDispatching = false;
-  this.prefix = 'ID_';
-  this.dispatcher_logs = [];
+  var action, dispatcher_logs, invoke, isDispatching, isHandled, isPending, lastID, payload, prefix, registry;
+  registry = {};
+  isHandled = {};
+  isPending = {};
+  lastID = 1;
+  isDispatching = false;
+  prefix = 'ID_';
+  dispatcher_logs = [];
+  action = null;
+  payload = null;
 
   /**
   Trigger the callback registered by a given store
@@ -16,14 +18,14 @@ angular.module('dispatcher', []).service('dispatcher', function(dataContract) {
    */
   invoke = function(store) {
     var e, error;
-    this.isPending[store] = true;
+    isPending[store] = true;
     try {
-      this.registry[store](this.action, this.payload);
+      registry[store](action, payload);
     } catch (error) {
       e = error;
       console.error(e);
     }
-    return this.isHandled[store] = true;
+    return isHandled[store] = true;
   };
   return {
 
@@ -39,12 +41,12 @@ angular.module('dispatcher', []).service('dispatcher', function(dataContract) {
      */
     register: function(callback, name) {
       if (!name) {
-        name = "" + this.prefix + (this.lastID++);
+        name = "" + prefix + (lastID++);
       }
-      if (name in this.registry) {
+      if (name in registry) {
         throw new Error("dispatcher.register(...): a store is already registered under " + name + ".");
       }
-      this.registry[name] = callback;
+      registry[name] = callback;
       return name;
     },
 
@@ -53,7 +55,7 @@ angular.module('dispatcher', []).service('dispatcher', function(dataContract) {
      */
     waitFor: function(stores) {
       var i, len, results, store;
-      if (!this.isDispatching) {
+      if (!isDispatching) {
         throw new Error("dispatcher.waitFor(...): must be called only while dispatching.");
       }
       if (!_.isArray(stores)) {
@@ -62,7 +64,7 @@ angular.module('dispatcher', []).service('dispatcher', function(dataContract) {
       results = [];
       for (i = 0, len = stores.length; i < len; i++) {
         store = stores[i];
-        if (this.isPending[store]) {
+        if (isPending[store]) {
           throw new Error("dispatcher.waitFor(...): circular dependency detected while waiting for " + store);
         }
         results.push(invoke(store));
@@ -87,33 +89,32 @@ angular.module('dispatcher', []).service('dispatcher', function(dataContract) {
     Unregister a store.
      */
     unregister: function(name) {
-      if (!(name in this.registry)) {
+      if (!(name in registry)) {
         throw new Error("dispatcher.unregister(...): " + name + " is not a registered.");
       }
-      return delete this.registry[name];
+      return delete registry[name];
     },
 
     /**
     Start dispatching action and payload to the stores
      */
     dispatch: function(action, payload) {
-      var i, len, ref, store;
+      var i, len, store;
       if (window.__DEV__) {
         console.debug("Dispatch: " + action.name, payload);
         dataContract.check(payload, action.schema);
-        this.dispatcher_logs.push({
+        dispatcher_logs.push({
           action: action,
           payload: payload
         });
       }
-      if (this.isDispatching) {
+      if (isDispatching) {
         throw new Error('dispatcher.dispacth(...): Cannot dispacth while dispatching');
       }
       this.startDispatching(action, payload);
-      ref = this.registry;
-      for (i = 0, len = ref.length; i < len; i++) {
-        store = ref[i];
-        if (!this.isPending[store]) {
+      for (i = 0, len = registry.length; i < len; i++) {
+        store = registry[i];
+        if (!isPending[store]) {
           this.invoke(store);
         }
       }
@@ -124,7 +125,7 @@ angular.module('dispatcher', []).service('dispatcher', function(dataContract) {
     Return true if dispatcher is in the middle of a dispatch
      */
     isDispatching: function() {
-      return this.isDispatching;
+      return isDispatching;
     },
 
     /**
@@ -133,16 +134,15 @@ angular.module('dispatcher', []).service('dispatcher', function(dataContract) {
     - Attach action and payload to dispatcher object's scope
      */
     startDispatching: function(action, payload) {
-      var i, len, ref, results, store;
-      this.isDispatching = true;
-      this.action = action;
-      this.payload = payload;
-      ref = this.registry;
+      var i, len, results, store;
+      isDispatching = true;
+      action = action;
+      payload = payload;
       results = [];
-      for (i = 0, len = ref.length; i < len; i++) {
-        store = ref[i];
-        this.isHandled[store] = false;
-        results.push(this.isPending[store] = false);
+      for (i = 0, len = registry.length; i < len; i++) {
+        store = registry[i];
+        isHandled[store] = false;
+        results.push(isPending[store] = false);
       }
       return results;
     },
@@ -151,9 +151,9 @@ angular.module('dispatcher', []).service('dispatcher', function(dataContract) {
     Finishes the dispatch cycle
      */
     stopDispatching: function() {
-      this.isDispatching = false;
-      this.action = null;
-      return this.payload = null;
+      isDispatching = false;
+      action = null;
+      return payload = null;
     }
   };
 });

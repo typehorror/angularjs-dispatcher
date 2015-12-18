@@ -2,15 +2,17 @@ angular.module('dispatcher', []).service 'dispatcher',
     (
         dataContract
     ) ->
-        @registry = {}
-        @isHandled = {}
-        @isPending = {}
-        @lastID = 1
-        @isDispatching = false
+        registry = {}
+        isHandled = {}
+        isPending = {}
+        lastID = 1
+        isDispatching = false
 
-        @prefix = 'ID_'
-        @dispatcher_logs = []
+        prefix = 'ID_'
+        dispatcher_logs = []
 
+        action = null
+        payload = null
 
         ###*
         Trigger the callback registered by a given store
@@ -19,14 +21,14 @@ angular.module('dispatcher', []).service 'dispatcher',
         other store from being dispatched to.
         ###
         invoke = (store) ->
-            @isPending[store] = true
+            isPending[store] = true
 
             try
-                @registry[store](@action, @payload)
+                registry[store](action, payload)
             catch e
                 console.error e
 
-            @isHandled[store] = true
+            isHandled[store] = true
 
 
         ###*
@@ -41,12 +43,12 @@ angular.module('dispatcher', []).service 'dispatcher',
         ###
         register: (callback, name) ->
             unless name  # Generate an ID
-                name = "#{@prefix}#{@lastID++}"
+                name = "#{prefix}#{lastID++}"
 
-            if name of @registry
+            if name of registry
                 throw new Error("dispatcher.register(...): a store is already registered under #{name}.")
 
-            @registry[name] = callback
+            registry[name] = callback
 
             return name
 
@@ -55,7 +57,7 @@ angular.module('dispatcher', []).service 'dispatcher',
         Wait for a store or a list of store digest cycle
         ###
         waitFor: (stores) ->
-            unless @isDispatching
+            unless isDispatching
                 throw new Error("dispatcher.waitFor(...): must be called only while dispatching.")
 
             # Cast to an array if not already one
@@ -63,7 +65,7 @@ angular.module('dispatcher', []).service 'dispatcher',
                 stores = [stores]
 
             for store in stores
-                if @isPending[store]
+                if isPending[store]
                     throw new Error(
                         "dispatcher.waitFor(...): circular dependency detected while waiting for #{store}"
                     )
@@ -83,10 +85,10 @@ angular.module('dispatcher', []).service 'dispatcher',
         Unregister a store.
         ###
         unregister: (name) ->
-            unless name of @registry
+            unless name of registry
                 throw new Error("dispatcher.unregister(...): #{name} is not a registered.")
 
-            delete @registry[name]
+            delete registry[name]
 
 
         ###*
@@ -96,15 +98,15 @@ angular.module('dispatcher', []).service 'dispatcher',
             if window.__DEV__
                 console.debug "Dispatch: #{action.name}", payload
                 dataContract.check payload, action.schema
-                @dispatcher_logs.push {action, payload}
+                dispatcher_logs.push {action, payload}
 
-            if @isDispatching
+            if isDispatching
                 throw new Error('dispatcher.dispacth(...): Cannot dispacth while dispatching')
 
             @startDispatching(action, payload)
 
-            for store in @registry
-                @invoke(store) unless @isPending[store]
+            for store in registry
+                @invoke(store) unless isPending[store]
 
             @stopDispatching()
 
@@ -113,7 +115,7 @@ angular.module('dispatcher', []).service 'dispatcher',
         Return true if dispatcher is in the middle of a dispatch
         ###
         isDispatching: ->
-            return @isDispatching
+            return isDispatching
 
 
         ###*
@@ -122,19 +124,19 @@ angular.module('dispatcher', []).service 'dispatcher',
         - Attach action and payload to dispatcher object's scope
         ###
         startDispatching: (action, payload) ->
-            @isDispatching = true
-            @action = action
-            @payload = payload
+            isDispatching = true
+            action = action
+            payload = payload
 
-            for store in @registry
-                @isHandled[store] = false
-                @isPending[store] = false
+            for store in registry
+                isHandled[store] = false
+                isPending[store] = false
 
 
         ###*
         Finishes the dispatch cycle
         ###
         stopDispatching: ->
-            @isDispatching = false
-            @action = null
-            @payload = null
+            isDispatching = false
+            action = null
+            payload = null
