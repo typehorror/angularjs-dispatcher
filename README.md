@@ -30,7 +30,7 @@ angular.module('my_app').service 'my_store',
                     return
 
             # broadcast this store has changed
-            $rootScope.$broadcast change_event, store
+            $rootScope.$broadcast store.change_event, store
 
 
         dispatcher.register(onDispatch)
