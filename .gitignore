@@ -1,0 +1,9 @@
+*.swp
+*.swo
+*.*~
+*.log
+.*
+*.vim
+
+node_modules/
+bower_components/
