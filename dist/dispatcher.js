@@ -1,5 +1,5 @@
 angular.module('dispatcher', []).service('dispatcher', function(dataContract) {
-  var action, dispatcher_logs, isDispatching, isHandled, isPending, lastID, payload, prefix, registry;
+  var dispatch_scope, dispatcher_logs, isDispatching, isHandled, isPending, lastID, prefix, registry;
   registry = {};
   isHandled = {};
   isPending = {};
@@ -7,8 +7,10 @@ angular.module('dispatcher', []).service('dispatcher', function(dataContract) {
   isDispatching = false;
   prefix = 'ID_';
   dispatcher_logs = [];
-  action = null;
-  payload = null;
+  dispatch_scope = {
+    action: null,
+    payload: null
+  };
   return {
 
     /**
@@ -21,7 +23,7 @@ angular.module('dispatcher', []).service('dispatcher', function(dataContract) {
       var e, error;
       isPending[store] = true;
       try {
-        registry[store](action, payload);
+        registry[store](dispatch_scope.action, dispatch_scope.payload);
       } catch (error) {
         e = error;
         console.error(e);
@@ -136,8 +138,8 @@ angular.module('dispatcher', []).service('dispatcher', function(dataContract) {
     startDispatching: function(action, payload) {
       var callback, results, store;
       isDispatching = true;
-      action = action;
-      payload = payload;
+      dispatch_scope.action = action;
+      dispatch_scope.payload = payload;
       results = [];
       for (store in registry) {
         callback = registry[store];
@@ -152,8 +154,8 @@ angular.module('dispatcher', []).service('dispatcher', function(dataContract) {
      */
     stopDispatching: function() {
       isDispatching = false;
-      action = null;
-      return payload = null;
+      dispatch_scope.action = null;
+      return dispatch_scope.payload = null;
     }
   };
 });
