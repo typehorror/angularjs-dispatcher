@@ -15,6 +15,7 @@ the `dispatcher` is then loaded through the dependency on your stores
 angular.module('my_app').service 'my_store',
     (
         dispatcher
+        my_other_store
     ) ->
         store =
             my_value: null
@@ -25,6 +26,7 @@ angular.module('my_app').service 'my_store',
                 when 'FOO_ACTION'
                     store.my_value = payload
                 when 'BAR_ACTION'
+                    dispatcher.waitFor(my_other_store)
                     store.my_value = null
                 else
                     return
