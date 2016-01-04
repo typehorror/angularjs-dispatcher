@@ -20,7 +20,7 @@ angular.module('dispatcher', []).service 'dispatcher',
         Error is catched and logged but does not break to prevent
         other store from being dispatched to.
         ###
-        invoke = (store) ->
+        invoke: (store) ->
             isPending[store] = true
 
             try
@@ -70,7 +70,7 @@ angular.module('dispatcher', []).service 'dispatcher',
                         "dispatcher.waitFor(...): circular dependency detected while waiting for #{store}"
                     )
 
-                invoke(store)
+                @invoke(store)
 
 
         ###*
@@ -105,7 +105,7 @@ angular.module('dispatcher', []).service 'dispatcher',
 
             @startDispatching(action, payload)
 
-            for store in registry
+            for store, callback of registry
                 @invoke(store) unless isPending[store]
 
             @stopDispatching()
@@ -128,7 +128,7 @@ angular.module('dispatcher', []).service 'dispatcher',
             action = action
             payload = payload
 
-            for store in registry
+            for store, callback of registry
                 isHandled[store] = false
                 isPending[store] = false
 
