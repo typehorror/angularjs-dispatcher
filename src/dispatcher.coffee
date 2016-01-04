@@ -11,8 +11,9 @@ angular.module('dispatcher', []).service 'dispatcher',
         prefix = 'ID_'
         dispatcher_logs = []
 
-        action = null
-        payload = null
+        dispatch_scope =
+            action: null
+            payload: null
 
         ###*
         Trigger the callback registered by a given store
@@ -24,7 +25,7 @@ angular.module('dispatcher', []).service 'dispatcher',
             isPending[store] = true
 
             try
-                registry[store](action, payload)
+                registry[store](dispatch_scope.action, dispatch_scope.payload)
             catch e
                 console.error e
 
@@ -125,8 +126,8 @@ angular.module('dispatcher', []).service 'dispatcher',
         ###
         startDispatching: (action, payload) ->
             isDispatching = true
-            action = action
-            payload = payload
+            dispatch_scope.action = action
+            dispatch_scope.payload = payload
 
             for store, callback of registry
                 isHandled[store] = false
@@ -138,5 +139,5 @@ angular.module('dispatcher', []).service 'dispatcher',
         ###
         stopDispatching: ->
             isDispatching = false
-            action = null
-            payload = null
+            dispatch_scope.action = null
+            dispatch_scope.payload = null
